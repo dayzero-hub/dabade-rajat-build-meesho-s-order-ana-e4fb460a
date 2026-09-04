@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: One row per real customer (customer_unique_id), not per order.
+    columns:
+      - name: customer_key
+        description: Surrogate key, md5 hash of customer_unique_id.
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        description: The durable person behind one or more orders; the dimension's natural key.
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description: Zip code prefix from one of the customer's order records.
+      - name: customer_city
+        description: City from one of the customer's order records.
+      - name: customer_state
+        description: State from one of the customer's order records.
+
+  - name: dim_sellers
+    description: One row per seller.
+    columns:
+      - name: seller_key
+        description: Surrogate key, md5 hash of seller_id.
+        tests:
+          - not_null
+          - unique
+      - name: seller_id
+        description: Natural key.
+        tests:
+          - not_null
+      - name: seller_zip_code_prefix
+        description: Seller's zip code prefix.
+      - name: seller_city
+        description: Seller's city.
+      - name: seller_state
+        description: Seller's state.
+
+  - name: dim_products
+    description: One row per product.
+    columns:
+      - name: product_key
+        description: Surrogate key, md5 hash of product_id.
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: Natural key.
+        tests:
+          - not_null
+      - name: product_category_name
+        description: Product category, in the source's original (Portuguese) naming.
+      - name: product_name_length
+        description: Character count of the product name at listing time.
+      - name: product_description_length
+        description: Character count of the product description at listing time.
+      - name: product_photos_qty
+        description: Number of photos on the listing.
+      - name: product_weight_g
+        description: Product weight in grams.
+      - name: product_length_cm
+        description: Product length in centimeters.
+      - name: product_height_cm
+        description: Product height in centimeters.
+      - name: product_width_cm
+        description: Product width in centimeters.
+
+  - name: dim_dates
+    description: Generated calendar spanning every date the order lifecycle touches.
+    columns:
+      - name: date_key
+        description: Surrogate key, date formatted as YYYYMMDD.
+        tests:
+          - not_null
+          - unique
+      - name: date_day
+        description: Calendar date.
+        tests:
+          - not_null
+      - name: year
+        description: Calendar year.
+      - name: quarter
+        description: Calendar quarter (1-4).
+      - name: month
+        description: Calendar month (1-12).
+      - name: month_name
+        description: Full month name.
+      - name: day_of_month
+        description: Day of month (1-31).
+      - name: day_of_week
+        description: DuckDB's dayofweek() — 0-6, Sunday=0.
+      - name: day_name
+        description: Full weekday name.
+      - name: is_weekend
+        description: True for Saturday and Sunday.
