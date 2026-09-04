@@ -10,4 +10,5 @@ select
     product_height_cm,
     product_width_cm
 from {{ ref('stg_products') }}
+-- product_id is already unique in staging; this is a defensive no-op, so the tiebreaker doesn't matter.
 qualify row_number() over (partition by product_id order by product_id) = 1

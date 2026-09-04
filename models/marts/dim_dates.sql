@@ -19,6 +19,7 @@ select
     extract(month from date_day) as month,
     strftime(date_day, '%B') as month_name,
     extract(day from date_day) as day_of_month,
+    -- DuckDB's dayofweek() is 0-6 with Sunday=0, not ISO (Monday=1).
     dayofweek(date_day) as day_of_week,
     strftime(date_day, '%A') as day_name,
     dayofweek(date_day) in (0, 6) as is_weekend

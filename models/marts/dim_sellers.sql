@@ -5,4 +5,5 @@ select
     seller_city,
     seller_state
 from {{ ref('stg_sellers') }}
+-- seller_id is already unique in staging; this is a defensive no-op, so the tiebreaker doesn't matter.
 qualify row_number() over (partition by seller_id order by seller_id) = 1
