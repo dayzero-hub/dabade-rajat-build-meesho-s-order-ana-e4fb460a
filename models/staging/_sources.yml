@@ -6,9 +6,32 @@ sources:
     schema: main
     tables:
       - name: olist_customers_dataset
+        description: Raw customer records, one row per order (not per person).
       - name: olist_orders_dataset
+        description: Raw order header records, one row per order.
       - name: olist_order_items_dataset
+        description: Raw order line items, one row per item within an order.
       - name: olist_order_payments_dataset
+        description: Raw payment records, one or more rows per order.
       - name: olist_order_reviews_dataset
+        description: Raw customer review records, one row per review.
       - name: olist_products_dataset
+        description: Raw product catalog, one row per product.
       - name: olist_sellers_dataset
+        description: Raw seller records, one row per seller.
+
+models:
+  - name: stg_customers
+    description: Cleaned customer records; carries both the per-order id and the real-person id.
+  - name: stg_orders
+    description: Cleaned order header records, one row per order.
+  - name: stg_order_items
+    description: Cleaned order line items, one row per item within an order.
+  - name: stg_order_payments
+    description: Cleaned payment records, one or more rows per order.
+  - name: stg_order_reviews
+    description: Cleaned customer review records, one row per review.
+  - name: stg_products
+    description: Cleaned product catalog, one row per product.
+  - name: stg_sellers
+    description: Cleaned seller records, one row per seller.
