@@ -96,3 +96,62 @@ models:
         description: Full weekday name.
       - name: is_weekend
         description: True for Saturday and Sunday.
+
+  - name: fct_order_items
+    description: One row per order line item. Includes lines from orders that were never delivered (cancelled, unavailable, still in transit); delivery_days and delivered_late are null for those.
+    columns:
+      - name: order_item_key
+        description: Surrogate key, md5 hash of order_id and order_item_id.
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: Natural key of the order this line belongs to.
+        tests:
+          - not_null
+      - name: order_item_id
+        description: Line number within the order.
+        tests:
+          - not_null
+      - name: customer_key
+        description: Foreign key to dim_customers.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
+      - name: product_key
+        description: Foreign key to dim_products.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_key
+      - name: seller_key
+        description: Foreign key to dim_sellers.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_sellers')
+                field: seller_key
+      - name: order_date_key
+        description: Foreign key to dim_dates, on the order's purchase date.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dates')
+                field: date_key
+      - name: order_status
+        description: Order status at the source; degenerate dimension, not modelled separately.
+      - name: price
+        description: Additive measure. Line item price.
+      - name: freight_value
+        description: Additive measure. Freight charged for this line item.
+      - name: delivery_days
+        description: Derived measure. Days from order_purchased_at to order_delivered_customer_at; null if the order was never delivered.
+      - name: delivered_late
+        description: Derived measure. True if delivered after order_estimated_delivery_at; null if the order was never delivered.
