@@ -13,6 +13,7 @@ models:
         description: The durable person behind one or more orders; the dimension's natural key.
         tests:
           - not_null
+          - unique
       - name: customer_zip_code_prefix
         description: Zip code prefix from one of the customer's order records.
       - name: customer_city
@@ -32,6 +33,7 @@ models:
         description: Natural key.
         tests:
           - not_null
+          - unique
       - name: seller_zip_code_prefix
         description: Seller's zip code prefix.
       - name: seller_city
@@ -51,6 +53,7 @@ models:
         description: Natural key.
         tests:
           - not_null
+          - unique
       - name: product_category_name
         description: Product category, in the source's original (Portuguese) naming.
       - name: product_name_length
@@ -80,6 +83,7 @@ models:
         description: Calendar date.
         tests:
           - not_null
+          - unique
       - name: year
         description: Calendar year.
       - name: quarter
@@ -147,6 +151,15 @@ models:
                 field: date_key
       - name: order_status
         description: Order status at the source; degenerate dimension, not modelled separately.
+        tests:
+          # arguments: is required, not optional, on dbt-core 1.10.23 — the flat form (values:
+          # directly under accepted_values:) still parses but trips
+          # [WARNING][MissingArgumentsPropertyInGenericTestDeprecation]. Verified with
+          # `dbt build --no-partial-parse` on both forms before pinning this. Same reasoning
+          # applies to the relationships: tests elsewhere in this file.
+          - accepted_values:
+              arguments:
+                values: ['delivered', 'shipped', 'canceled', 'unavailable', 'invoiced', 'processing', 'created', 'approved']
       - name: price
         description: Additive measure. Line item price.
       - name: freight_value
