@@ -5,11 +5,22 @@
 -- included, not dropped: the line item was still sold and still carries price/freight_value.
 -- delivery_days and delivered_late are null for them rather than the fact row disappearing —
 -- that null propagates on its own from order_delivered_customer_at being null, no CASE needed.
+with customer_bridge as (
+    -- dim_customers is keyed on the real person (customer_unique_id), not the per-order id on
+    -- stg_orders (customer_order_id). This is the only place that mapping lives, so the fact's
+    -- join list below only needs one join to land on customer_key.
+    select
+        c.customer_order_id,
+        dc.customer_key
+    from {{ ref('stg_customers') }} c
+    inner join {{ ref('dim_customers') }} dc on c.customer_unique_id = dc.customer_unique_id
+)
+
 select
-    md5(oi.order_id || '-' || oi.order_item_id::varchar) as order_item_key,
+    md5(concat_ws('||', oi.order_id, oi.order_item_id::varchar)) as order_item_key,
     oi.order_id,
     oi.order_item_id,
-    dc.customer_key,
+    cb.customer_key,
     dp.product_key,
     ds.seller_key,
     dd.date_key as order_date_key,
@@ -17,11 +28,13 @@ select
     oi.price,
     oi.freight_value,
     date_diff('day', o.order_purchased_at, o.order_delivered_customer_at) as delivery_days,
-    o.order_delivered_customer_at > o.order_estimated_delivery_at as delivered_late
+    case
+        when o.order_delivered_customer_at is null then null
+        else o.order_delivered_customer_at > o.order_estimated_delivery_at
+    end::boolean as delivered_late
 from {{ ref('stg_order_items') }} oi
 inner join {{ ref('stg_orders') }} o on oi.order_id = o.order_id
-inner join {{ ref('stg_customers') }} c on o.customer_order_id = c.customer_order_id
-inner join {{ ref('dim_customers') }} dc on c.customer_unique_id = dc.customer_unique_id
+inner join customer_bridge cb on o.customer_order_id = cb.customer_order_id
 inner join {{ ref('dim_products') }} dp on oi.product_id = dp.product_id
 inner join {{ ref('dim_sellers') }} ds on oi.seller_id = ds.seller_id
 inner join {{ ref('dim_dates') }} dd on cast(o.order_purchased_at as date) = dd.date_day
