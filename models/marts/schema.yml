@@ -152,6 +152,11 @@ models:
       - name: order_status
         description: Order status at the source; degenerate dimension, not modelled separately.
         tests:
+          # arguments: is required, not optional, on dbt-core 1.10.23 — the flat form (values:
+          # directly under accepted_values:) still parses but trips
+          # [WARNING][MissingArgumentsPropertyInGenericTestDeprecation]. Verified with
+          # `dbt build --no-partial-parse` on both forms before pinning this. Same reasoning
+          # applies to the relationships: tests elsewhere in this file.
           - accepted_values:
               arguments:
                 values: ['delivered', 'shipped', 'canceled', 'unavailable', 'invoiced', 'processing', 'created', 'approved']
